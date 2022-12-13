@@ -135,7 +135,7 @@ model = dict(
         mask_head=None),
     # domain classifier
     domain_labels=['rain_label'],  # names of the domain label for this domain classifier
-    domian_head=dict(
+    domain_head=dict(
         type='DAHead',
         alpha=1.0,  # hyperparameter in GRL
         domain_image_head=dict(
