@@ -158,7 +158,6 @@ model = dict(
                               gamma=5.0, alpha=0.5, loss_weight=1.0)),
         with_consistency=True,
     ),
-),
     # model training and testing settings
     train_cfg=dict(
         rpn=dict(

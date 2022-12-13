@@ -94,7 +94,7 @@ model = dict(
         out_channels=256,
         num_outs=5),  # use max pool to get more levels on top of outputs, refers to mmdet/models/necks/fpn.py
     rpn_head=dict(
-        type='RPNHead',
+        type='DARPNHead',  # modified RPN head base on class RPNHead
         in_channels=256,  # rpn_head.in_channels is the same as neck.out_channels
         feat_channels=256,  # out_channels of hidden layers in shared convs_layer before rpn_cls and rpn_reg in RPN Head
         anchor_generator=dict(
@@ -111,14 +111,14 @@ model = dict(
             type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
         loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
     roi_head=dict(
-        type='StandardRoIHead',
+        type='DAStandardRoIHead',  # modified RoI head base on class StandardRoIHead
         bbox_roi_extractor=dict(
             type='SingleRoIExtractor',
             roi_layer=dict(type='RoIAlign', output_size=7, sampling_ratio=0),
             out_channels=256,  # roi_head.bbox_roi_extractor.out_channels is the same as neck.out_channels
             featmap_strides=[4, 8, 16, 32]),  # chosed from rpn_head.anchor_generator.strides
         bbox_head=dict(
-            type='Shared2FCBBoxHead',
+            type='DAShared2FCBBoxHead',  # modified bounding box head of RoI head base on class Shared2FCBBoxHead
             in_channels=256,  # roi_head.bbox_head.in_channels is the same as roi_head.bbox_roi_extractor.out_channels
             roi_feat_size=7,  # rois get through avg_pool to size (roi_feat_size, roi_feat_size)
             fc_out_channels=1024,  # flatten and get through 2FC
@@ -134,15 +134,24 @@ model = dict(
         mask_roi_extractor=None,  # bbox_head and mask_head shares the same roi_extractor
         mask_head=None),
     # domain classifier
-    domain_labels=['rain_label'],  # names of domain labels for this domain classifier
-    alpha=1.0,  # hyperparameter in GRL
-    domain_neck=dict(type='mmcls.GlobalAveragePooling'),
-    domain_head=dict(
-        type='mmcls.LinearClsHead',
-        num_classes=2,  # 2 classes: rain_label=0 for images without rain, rain_label=1 for images with rain
-        in_channels=256,
-        # loss=dict(type='FocalLoss', gamma=2.0, alpha=0.25, loss_weight=1.0)),  # default
-        loss=dict(type='FocalLoss', gamma=5.0, alpha=0.5, loss_weight=1.0)),  # focal loss means weak global alignment
+    domain_labels=['rain_label'],  # names of the domain label for this domain classifier
+    domian_head=dict(
+        type='DAHead',
+        alpha=1.0,  # hyperparameter in GRL
+        domain_image_head=dict(
+            type='DAImgHead',
+            in_channels=256,  # domain_image_head.in_channels is equal to neck.out_channels
+            num_classes=1,  # number of domain labels for the image-level DA head
+            loss_img_cls=dict(type='CrossEntropyLoss',  # cross entropy loss means strong global alignment
+                              use_sigmoid=True, loss_weight=1.0)),
+        domain_instance_head=dict(
+            type='DAInsHead',
+            in_channels=256,  # domain_instance_head.in_channels == domain_instance_head.bbox_roi_extractor.out_channels
+            num_classes=1,  # number of domain labels for the instance-level DA head
+            loss_ins_cls=dict(type='FocalLoss',  # focal loss means weak local alignment
+                              gamma=5.0, alpha=0.5, loss_weight=1.0)),
+        with_consistency=True,
+    ),
     # model training and testing settings
     train_cfg=dict(
         rpn=dict(
