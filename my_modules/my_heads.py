@@ -58,7 +58,7 @@ class DARPNHead(RPNHead):
         """
         outs = self(x)  # outs = self.forward(x)
         if gt_labels is None:
-            loss_inputs = outs + (gt_bboxes, img_metas)
+            loss_inputs = outs + (gt_bboxes, None, img_metas)
         else:
             loss_inputs = outs + (gt_bboxes, gt_labels, img_metas)
         losses = self.loss(*loss_inputs, gt_bboxes_ignore=gt_bboxes_ignore,

@@ -115,7 +115,7 @@ model = dict(
             type='SingleRoIExtractor',
             roi_layer=dict(type='RoIAlign', output_size=7, sampling_ratio=0),
             out_channels=256,  # roi_head.bbox_roi_extractor.out_channels is the same as neck.out_channels
-            featmap_strides=[4, 8, 16, 32]),  # chosed from rpn_head.anchor_generator.strides
+            featmap_strides=[4, 8, 16, 32]),  # chose from rpn_head.anchor_generator.strides
         bbox_head=dict(
             type='DAShared2FCBBoxHead',  # modified bounding box head of RoI head base on class Shared2FCBBoxHead
             in_channels=256,  # roi_head.bbox_head.in_channels is the same as roi_head.bbox_roi_extractor.out_channels
