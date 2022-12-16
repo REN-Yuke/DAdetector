@@ -768,6 +768,7 @@ class DAHead(BaseModule, metaclass=ABCMeta):
 
     def consistency(self, domain_img_cls_logit, domain_ins_cls_logit, batch_idx):
         """
+        Consistency check between two separated domain heads' results.
 
         :param domain_img_cls_logit: (Tensor), cls logit with shape (batch size, self.num_classes, len(x)).
         :param domain_ins_cls_logit: (Tensor), cls logit with shape (num_rois, self.num_classes).

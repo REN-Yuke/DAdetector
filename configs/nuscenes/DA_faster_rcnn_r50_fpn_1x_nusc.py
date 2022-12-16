@@ -2,7 +2,7 @@ _base_ = [
     '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
 ]
 
-# import customer-defined modules and modules from mmcls
+# import customer-defined modules
 custom_imports = dict(imports=['my_modules.my_pipelines',
                                'my_modules.my_datasets',
                                'my_modules.my_detectors',
@@ -30,7 +30,7 @@ train_pipeline = [
     dict(type='Normalize', **img_norm_cfg),
     dict(type='Pad', size_divisor=32),
     dict(type='DefaultFormatBundle'),
-    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', domain_labels]),  # collect domain labels
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', *domain_labels]),  # collect domain labels
 ]
 test_pipeline = [
     dict(type='LoadImageFromFile'),

@@ -1,32 +1,31 @@
-# import customer-defined modules and modules from mmcls
+# import customer-defined modules
 custom_imports = dict(imports=['my_modules.my_pipelines',
                                'my_modules.my_datasets',
                                'my_modules.my_detectors',
-                               'mmcls.models.necks',
-                               'mmcls.models.heads'],
+                               'my_modules.my_heads'],
                       allow_failed_imports=False)
 
 # dataset settings
 dataset_type = 'DADataset'  # based on Coco dataset, add domain labels
 data_root = r'E:/datasets/nuScenes/Full dataset (v1.0)/trainval/'
-# data_root = r'E:/datasets/nuScenes/Mini dataset/'
 class_names = [
     'car', 'truck', 'trailer', 'bus', 'construction_vehicle', 'bicycle',
     'motorcycle', 'pedestrian', 'traffic_cone', 'barrier'
 ]
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+domain_labels = ['rain_label']
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     # dict(type='LoadAnnotations', with_bbox=True, with_label=True),
-    dict(type='DALoadAnnotations', domain_labels=['rain_label'], with_bbox=True, with_label=True),  # load domain labels
+    dict(type='DALoadAnnotations', domain_labels=domain_labels, with_bbox=True, with_label=True),  # load domain labels
     # dict(type='Resize', img_scale=(1600, 900), keep_ratio=True),
     dict(type='Resize', img_scale=(1333, 800), keep_ratio=True),  # original image size is (1600, 900)
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='Pad', size_divisor=32),
     dict(type='DefaultFormatBundle'),
-    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'rain_label']),  # collect domain labels
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', *domain_labels]),  # collect domain labels
 ]
 test_pipeline = [
     dict(type='LoadImageFromFile'),
