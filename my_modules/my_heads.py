@@ -393,7 +393,7 @@ class DAStandardRoIHead(StandardRoIHead):
                                         *bbox_targets)
 
         # get batch_idx from rois to indicate every bbox_feats belongs to which image
-        batch_idx = torch.tensor([r[0] for r in rois])
+        batch_idx = torch.tensor([r[0] for r in rois], device='cuda')
 
         # add bbox_results.batch_idx
         bbox_results.update(loss_bbox=loss_bbox, batch_idx=batch_idx)
@@ -527,7 +527,7 @@ class DAImgHead(BaseModule, metaclass=ABCMeta):
         self.in_channels = in_channels
         self.num_classes = num_classes
 
-        if self.num_classes <= 0:
+        if self.num_classes <= 0 or type(self.num_classes) != type(0):
             raise ValueError(
                 f'num_classes={num_classes} must be a positive integer')
 
@@ -555,13 +555,13 @@ class DAImgHead(BaseModule, metaclass=ABCMeta):
         """
         if isinstance(x, torch.Tensor):
             assert x.ndim == 4, 'single level feature map should have 4 dimensions'
-        elif isinstance(x, list):
-            assert mmcv.is_list_of(x, torch.Tensor)
+        elif isinstance(x, tuple):
+            assert mmcv.is_tuple_of(x, torch.Tensor)
             assert [i.ndim == 4 for i in x], 'feature map of every level should have 4 dimensions'
         else:
-            raise ValueError('feature map x must be either Tensor or list of Tensor')
+            raise ValueError('feature map x must be either Tensor or tuple of Tensor')
 
-        assert len(x) == len(gt_label)
+        assert all(len(i) == len(gt_label) for i in x)
 
         # forward pass
         cls_logit = []
@@ -599,8 +599,7 @@ class DAInsHead(BaseModule, metaclass=ABCMeta):
     def __init__(self,
                  in_channels=256,
                  num_classes=1,
-                 loss_ins_cls=dict(type='CrossEntropyLoss',
-                                   use_sigmoid=True, loss_weight=1.0),
+                 loss_ins_cls=dict(type='FocalLoss', gamma=5.0, alpha=0.5, loss_weight=1.0),
                  init_cfg=dict(type='Normal', layer='Linear', std=0.01),
                  *args,
                  **kwargs):
@@ -618,7 +617,7 @@ class DAInsHead(BaseModule, metaclass=ABCMeta):
         self.in_channels = in_channels
         self.num_classes = num_classes
 
-        if self.num_classes <= 0:
+        if self.num_classes <= 0 or type(self.num_classes) != type(0):
             raise ValueError(
                 f'num_classes={num_classes} must be a positive integer')
 
@@ -659,11 +658,14 @@ class DAInsHead(BaseModule, metaclass=ABCMeta):
         roi_feats = F.dropout(roi_feats, p=0.5)
         roi_feats = self.fc3(roi_feats)
         roi_feats = self.global_pool(roi_feats)
-        # domain_ins_cls_logit: Tensor: (num_rois, self.num_classes, 1, 1) -> (num_rois, self.num_classes)
-        domain_ins_cls_logit = torch.reshape(roi_feats, [roi_feats.shape[0], roi_feats.shape[1]])
 
-        # broadcast gt_label to match with prediction shape
-        domain_ins_gt_label = gt_label.reshape(-1, 1).expand_as(domain_ins_cls_logit)
+        # For class mmdet.models.losses.FocalLoss:
+        # domain_ins_cls_logit: Tensor: (num_rois, self.num_classes, 1, 1) -> (num_rois, self.num_classes)
+        domain_ins_cls_logit = torch.reshape(roi_feats, (roi_feats.shape[0], roi_feats.shape[1]))
+
+        # For class mmdet.models.losses.FocalLoss:
+        # domain_ins_gt_label: Tensor: (num_rois, )
+        domain_ins_gt_label = gt_label
 
         # calculate loss for DAInsHead
         loss_ins_cls = self.loss_ins_cls(domain_ins_cls_logit, domain_ins_gt_label, **kwargs)
@@ -753,7 +755,7 @@ class DAHead(BaseModule, metaclass=ABCMeta):
 
             # Change image-level domain label to instance-level domain_label
             batch_idx = roi_dict['batch_idx']
-            roi_domain_label = torch.tensor([domain_label[i.int()] for i in batch_idx])
+            roi_domain_label = torch.tensor([domain_label[i.int()] for i in batch_idx], device='cuda')
 
             loss_ins_cls, domain_ins_cls_logit = self.domain_instance_head(roi_feats, roi_domain_label,
                                                                            self.with_consistency)
@@ -779,8 +781,9 @@ class DAHead(BaseModule, metaclass=ABCMeta):
         pred_img = torch.mean(domain_img_cls_logit, dim=-1)
         # Tensor: (num_rois, self.num_classes) -> (batch size, self.num_classes)
         pred_ins = torch.zeros_like(pred_img)
-        for i in batch_idx:
+        for i in batch_idx.int():
             pred_ins[i] += domain_ins_cls_logit[i]
+        pred_ins = pred_ins / 512  # divided by model.train_cfg.rcnn.sampler.num (number of RoIs in each image)
         loss_consistency = F.mse_loss(pred_ins, pred_img)
         return dict(loss_consistency=loss_consistency)
 

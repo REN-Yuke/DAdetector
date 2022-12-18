@@ -26,23 +26,23 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
 
     # debug setting
-    parser.add_argument('--config',
-                        default=r'D:/PycharmProjects/pythonProject/DAdetector/'
-                                r'configs/nuscenes/faster_rcnn_r50_fpn_1x_nusc.py',
-                                # r'configs/nuscenes/DA_faster_rcnn_r50_fpn_1x_nusc.py',
-                        help='train config file path')
-    parser.add_argument('--work-dir',
-                        default=r'D:/PycharmProjects/pythonProject/DAdetector/'
-                                r'my_results/DA_faster_rcnn_r50_fpn_1x_nusc/train_results',
-                        help='the dir to save logs and models')
-    parser.add_argument('--cfg-options',
-                        default={'data.samples_per_gpu': 1, 'runner.max_epochs': 1})
-    parser.add_argument('--auto-scale-lr',
-                        default=True,
-                        help='enable automatically scaling LR.')
+    # parser.add_argument('--config',
+    #                     default=r'D:/PycharmProjects/pythonProject/DAdetector/'
+    #                             # r'configs/nuscenes/faster_rcnn_r50_fpn_1x_nusc.py',
+    #                             r'configs/nuscenes/DA_faster_rcnn_r50_fpn_1x_nusc.py',
+    #                     help='train config file path')
+    # parser.add_argument('--work-dir',
+    #                     default=r'D:/PycharmProjects/pythonProject/DAdetector/'
+    #                             r'my_results/DA_faster_rcnn_r50_fpn_1x_nusc/train_results',
+    #                     help='the dir to save logs and models')
+    # parser.add_argument('--cfg-options',
+    #                     default={'data.samples_per_gpu': 1, 'runner.max_epochs': 1})
+    # parser.add_argument('--auto-scale-lr',
+    #                     default=True,
+    #                     help='enable automatically scaling LR.')
 
-    # parser.add_argument('config', help='train config file path')
-    # parser.add_argument('--work-dir', help='the dir to save logs and models')
+    parser.add_argument('config', help='train config file path')
+    parser.add_argument('--work-dir', help='the dir to save logs and models')
     parser.add_argument(
         '--resume-from', help='the checkpoint file to resume from')
     parser.add_argument(
@@ -87,26 +87,26 @@ def parse_args():
         help='override some settings in the used config, the key-value pair '
         'in xxx=yyy format will be merged into config file (deprecate), '
         'change to --cfg-options instead.')
-    # parser.add_argument(
-    #     '--cfg-options',
-    #     nargs='+',
-    #     action=DictAction,
-    #     help='override some settings in the used config, the key-value pair '
-    #     'in xxx=yyy format will be merged into config file. If the value to '
-    #     'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
-    #     'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
-    #     'Note that the quotation marks are necessary and that no white space '
-    #     'is allowed.')
+    parser.add_argument(
+        '--cfg-options',
+        nargs='+',
+        action=DictAction,
+        help='override some settings in the used config, the key-value pair '
+        'in xxx=yyy format will be merged into config file. If the value to '
+        'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
+        'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
+        'Note that the quotation marks are necessary and that no white space '
+        'is allowed.')
     parser.add_argument(
         '--launcher',
         choices=['none', 'pytorch', 'slurm', 'mpi'],
         default='none',
         help='job launcher')
     parser.add_argument('--local_rank', type=int, default=0)
-    # parser.add_argument(
-    #     '--auto-scale-lr',
-    #     action='store_true',
-    #     help='enable automatically scaling LR.')
+    parser.add_argument(
+        '--auto-scale-lr',
+        action='store_true',
+        help='enable automatically scaling LR.')
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
@@ -283,13 +283,13 @@ if __name__ == '__main__':
 
 # FasterRCNN + nuScenes
 >>> python tools/train.py configs/nuscenes/faster_rcnn_r50_fpn_1x_nusc.py 
-    --cfg-options data.samples_per_gpu=1 runner.max_epochs=1 
+    --cfg-options data.samples_per_gpu=2 runner.max_epochs=12 
     --auto-scale-lr 
     --work-dir my_results/faster_rcnn_r50_fpn_1x_nusc/train_results 
 
 # Domain Adaptive FasterRCNN + nuScenes
 >>> python tools/train.py configs/nuscenes/DA_faster_rcnn_r50_fpn_1x_nusc.py 
-    --cfg-options data.samples_per_gpu=4 runner.max_epochs=5 optimizer.lr=1e-5
+    --cfg-options data.samples_per_gpu=2 runner.max_epochs=12 optimizer.lr=1e-5
     --auto-scale-lr 
     --work-dir my_results/DA_faster_rcnn_r50_fpn_1x_nusc/train_results 
 """

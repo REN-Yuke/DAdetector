@@ -153,9 +153,7 @@ class DATwoStageDetector(TwoStageDetector):
 
         if self.with_domain:
             # domain head forward and loss
-            domain_loss = self.domain_head.forward_train(x,
-                                                         roi_dict=roi_dict,
-                                                         domain_label=rain)
+            domain_loss = self.domain_head(x, roi_dict=roi_dict, domain_label=rain)
             losses.update(domain_loss)
 
         return losses

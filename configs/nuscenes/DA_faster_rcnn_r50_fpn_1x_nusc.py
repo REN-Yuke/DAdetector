@@ -147,13 +147,13 @@ model = dict(
         domain_image_head=dict(
             type='DAImgHead',
             in_channels=256,  # domain_image_head.in_channels is equal to neck.out_channels
-            num_classes=1,  # number of domain labels for the image-level DA head
+            num_classes=1,  # class number of domain labels, when loss_img_cls.use_sigmoid==True, it must be 1
             loss_img_cls=dict(type='CrossEntropyLoss',  # cross entropy loss means strong global alignment
                               use_sigmoid=True, loss_weight=1.0)),
         domain_instance_head=dict(
             type='DAInsHead',
             in_channels=256,  # domain_instance_head.in_channels == domain_instance_head.bbox_roi_extractor.out_channels
-            num_classes=1,  # number of domain labels for the instance-level DA head
+            num_classes=1,  # class number of domain labels, when loss_img_cls.use_sigmoid==True, it must be 1
             loss_ins_cls=dict(type='FocalLoss',  # focal loss means weak local alignment
                               gamma=5.0, alpha=0.5, loss_weight=1.0)),
         with_consistency=True,
