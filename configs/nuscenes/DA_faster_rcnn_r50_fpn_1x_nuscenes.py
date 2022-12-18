@@ -7,7 +7,8 @@ custom_imports = dict(imports=['my_modules.my_pipelines',
 
 # dataset settings
 dataset_type = 'DADataset'  # based on Coco dataset, add domain labels
-data_root = r'E:/datasets/nuScenes/Full dataset (v1.0)/trainval/'
+# data_root = r'E:/datasets/nuScenes/Full dataset (v1.0)/trainval/'
+data_root = r'/media/yuke/TOSHIBA_SSK/datasets/nuScenes/Full dataset (v1.0)/trainval/'
 class_names = [
     'car', 'truck', 'trailer', 'bus', 'construction_vehicle', 'bicycle',
     'motorcycle', 'pedestrian', 'traffic_cone', 'barrier'
@@ -53,7 +54,7 @@ data = dict(
         classes=class_names,  # classes used in training process
         pipeline=train_pipeline,
         test_mode=False,
-        filter_empty_gt=False),  # set filter_empty_gt to False, training process uses negative positives
+        filter_empty_gt=False),  # set filter_empty_gt to False, training process uses images without bounding boxes
     val=dict(
         type=dataset_type,
         data_root=data_root,
@@ -65,8 +66,7 @@ data = dict(
     test=dict(
         type=dataset_type,
         data_root=data_root,
-        # ann_file=data_root + 'plan1_infos_val_mono3d.coco.json',
-        ann_file=data_root + 'mini_infos_val_mono3d.coco.json',
+        ann_file=data_root + 'plan1_infos_val_mono3d.coco.json',
         img_prefix=data_root,
         classes=class_names,
         pipeline=test_pipeline,
