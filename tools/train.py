@@ -25,9 +25,10 @@ from mmdet.utils import (collect_env, get_device, get_root_logger,
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
 
-    # debug setting
+    # # debug setting
     # parser.add_argument('--config',
     #                     default=r'D:/PycharmProjects/pythonProject/DAdetector/'
+    #                     # default=r'/home/yuke/PycharmProjects/pythonProject/DAdetector/'
     #                             # r'configs/nuscenes/faster_rcnn_r50_fpn_1x_nusc.py',
     #                             r'configs/nuscenes/DA_faster_rcnn_r50_fpn_1x_nusc.py',
     #                     help='train config file path')
@@ -36,7 +37,7 @@ def parse_args():
     #                             r'my_results/DA_faster_rcnn_r50_fpn_1x_nusc/train_results',
     #                     help='the dir to save logs and models')
     # parser.add_argument('--cfg-options',
-    #                     default={'data.samples_per_gpu': 1, 'runner.max_epochs': 1})
+    #                     default={'data.samples_per_gpu': 1, 'runner.max_epochs': 1, 'log_config.interval': 1})
     # parser.add_argument('--auto-scale-lr',
     #                     default=True,
     #                     help='enable automatically scaling LR.')
@@ -289,7 +290,7 @@ if __name__ == '__main__':
 
 # Domain Adaptive FasterRCNN + nuScenes
 >>> python tools/train.py configs/nuscenes/DA_faster_rcnn_r50_fpn_1x_nusc.py 
-    --cfg-options data.samples_per_gpu=2 runner.max_epochs=12 optimizer.lr=1e-5
+    --cfg-options data.samples_per_gpu=2 runner.max_epochs=12 optimizer.lr=1e-5 
     --auto-scale-lr 
     --work-dir my_results/DA_faster_rcnn_r50_fpn_1x_nusc/train_results 
 """

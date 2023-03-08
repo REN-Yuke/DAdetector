@@ -275,6 +275,7 @@ if __name__ == '__main__':
     main()
 
 """
+# FasterRCNN + VOC
 >>> python tools/test.py configs/pascal_voc/faster_rcnn_r50_fpn_1x_voc0712.py 
     checkpoints/faster_rcnn_r50_fpn_1x_voc0712_20220320_192712-54bef0f3.pth 
     --cfg-options data.samples_per_gpu=16 
@@ -290,4 +291,14 @@ if __name__ == '__main__':
     --out tools/faster_rcnn_convnext_tiny_fpn_1x_voc0712/test_results/images_result.pkl 
     --work-dir tools/faster_rcnn_convnext_tiny_fpn_1x_voc0712/test_results 
     --eval mAP 
+
+# FasterRCNN + nuScenes
+>>> python tools/test.py configs/nuscenes/faster_rcnn_r50_fpn_1x_nusc.py 
+    checkpoints/faster_rcnn_r50_fpn_1x_voc0712_20220320_192712-54bef0f3.pth 
+    --cfg-options data.samples_per_gpu=16 
+    --show-dir tools/faster_rcnn_r50_fpn_1x_voc0712/test_results/painted_images 
+    --out tools/faster_rcnn_r50_fpn_1x_voc0712/test_results/images_result.pkl 
+    --work-dir tools/faster_rcnn_r50_fpn_1x_voc0712/test_results 
+    --eval bbox proposal
+    --fuse-conv-bn --gpu-collect 
 """
